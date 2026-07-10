@@ -1,0 +1,43 @@
+# Release — gate → discover → publish to pub.dev, driven by the changelog.
+# Delegates to the shared reusable workflow. dev reacts to CHANGELOG.pre.md
+# (prereleases), prod to CHANGELOG.md (stable). Publish waits on the branch-
+# named GitHub environment approval.
+name: Release
+
+on:
+  push:
+    branches: [dev, prod]
+    paths:
+      - 'CHANGELOG.md'
+      - 'CHANGELOG.pre.md'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to release (dev or prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, prod]
+      runner:
+        description: "Runner for infra jobs (gate, discover, publish)"
+        type: choice
+        options: [ubuntu-24.04, macos-14, windows-2025-vs2026]
+        default: ubuntu-24.04
+
+permissions: {}
+
+# A release must finish — never cancel an in-flight release run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    permissions:
+      contents: write  # create the release/tag, edit notes, ephemeral publish commit
+    uses: whuppi/ci/.github/workflows/release.yml@v2.0.5
+    with:
+      branch: ${{ inputs.branch || github.ref_name }}
+      runner: ${{ inputs.runner || 'ubuntu-24.04' }}
+    secrets:
+      pub-credentials: ${{ secrets.PUB_CREDENTIALS }}

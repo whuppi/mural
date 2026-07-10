@@ -1,0 +1,32 @@
+# Triage — on a new issue or PR: auto-label + assign; on PR push: revoke a
+# stale `ready-to-test`; on a dependabot push: post a recreate notice. Delegates
+# to the shared reusable workflow.
+#
+# PRIVILEGED. pull_request_target is GitHub's only way to write to fork PRs on a
+# public repo, so the reusable workflow hardens every job to the workflow-
+# security doctrine (no PR checkout, fork data env-only, no GITHUB_ENV writes,
+# least-privilege per-job tokens, owner-guarded, SHA-pinned) — the ignore on the
+# trigger below is only safe while all of that holds.
+name: Triage
+
+on:
+  issues:
+    types: [opened]
+  # zizmor: ignore[dangerous-triggers]
+  pull_request_target:
+    types: [opened, synchronize]
+
+permissions: {}
+
+# One triage run per PR / issue; never cancel an in-flight run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    permissions:
+      contents: read        # labeler reads .github/labeler.yml + the PR file list
+      issues: write         # assign maintainer on issue-opened events
+      pull-requests: write  # apply labels, revoke ready-to-test, post notices
+    uses: whuppi/ci/.github/workflows/triage.yml@v2.0.5

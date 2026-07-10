@@ -1,0 +1,32 @@
+# Auto-close — resolved-issue lifecycle: arm on `resolved`, honor a
+# `keep open` opt-out, sweep + close after the grace window. Delegates to the
+# shared reusable workflow. Base-repo issue events only — no privileged trigger.
+name: Auto-close
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # daily, 09:00 UTC
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+
+permissions: {}
+
+# Per-issue for the event handlers; one shared "sweep" group for the daily
+# cron / manual run. Never cancel an in-flight run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || 'sweep' }}
+  cancel-in-progress: false
+
+jobs:
+  auto-close:
+    permissions:
+      issues: write  # label, comment on, and close resolved issues
+    uses: whuppi/ci/.github/workflows/auto-close.yml@v2.0.5
+    with:
+      # Team slug for the humans (managed in the org, same team CODEOWNERS
+      # uses) + the slopfairy bot as a fixed automation hook. A maintainer
+      # change edits the team, never this line.
+      maintainers-mention: '@whuppi/mural-maintainers @slopfairy'

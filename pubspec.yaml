@@ -1,0 +1,34 @@
+name: mural
+version: 0.0.0
+description: >-
+  Capture any Flutter widget as an image, at any size. Screenshot huge
+  lists, full pages, and even unseen widgets — past the GPU texture
+  limit, always crisp, in constant memory.
+homepage: https://github.com/whuppi/mural
+repository: https://github.com/whuppi/mural
+issue_tracker: https://github.com/whuppi/mural/issues
+
+topics:
+  - screenshot
+  - widget-to-image
+  - capture
+  - image
+  - cross-platform
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Lint rules
+  flutter_lints: ^6.0.0
+
+  # Decodes mural's PNG output back to pixels in tests, proving the
+  # encoder + filter + zlib stack against an independent implementation.
+  image: ^4.3.0

@@ -1,0 +1,25 @@
+# Code ownership — enforced natively by GitHub's require_code_owner_reviews.
+#
+# Non-admin PRs need approval from a codeowner for every touched path.
+# Admin (repo owner) bypasses via enforce_admins: false.
+#
+# Order matters — last match wins (gitignore rules).
+
+# Default: maintainers team owns everything
+*                          @whuppi/mural-maintainers
+
+# Release files: repo owner only (contributors don't write changelogs or versions)
+/CHANGELOG.md              @chaudharydeepanshu
+/CHANGELOG.pre.md          @chaudharydeepanshu
+/pubspec.yaml              @chaudharydeepanshu
+/pubspec.lock              @chaudharydeepanshu
+/example/pubspec.lock      @chaudharydeepanshu
+
+# CI and config: repo owner only
+/.github/                  @chaudharydeepanshu
+/.githooks/                @chaudharydeepanshu
+
+# Build + supply-chain machinery: repo owner only. Holds the commit-types list
+# the hooks + PR lint key off, and the platform gate. A non-owner edit here is a
+# release or supply-chain risk.
+/tool/                     @chaudharydeepanshu

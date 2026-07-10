@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest a new capability
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What do you need?
+      placeholder: Describe the feature or capability you'd like.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: What's the use case?
+      placeholder: What are you building that needs this?
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      placeholder: How do you solve this today, if at all?

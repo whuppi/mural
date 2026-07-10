@@ -1,0 +1,63 @@
+name: Bug report
+description: Something isn't working
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      placeholder: Describe the bug. Include the MuralError you got (name + message), wrong pixels, or stack traces if you have them.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Call `mural.capture(...)` with ...
+        2. Then ...
+        3. See error / wrong image ...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: target
+    attributes:
+      label: Platform(s)
+      options:
+        - label: Android
+        - label: iOS
+        - label: macOS
+        - label: Windows
+        - label: Linux
+        - label: Web
+    validations:
+      required: true
+
+  - type: dropdown
+    id: door
+    attributes:
+      label: Capture door
+      options:
+        - Offscreen (capture)
+        - On-screen (captureBoundary)
+        - Streaming (captureInto)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: mural version
+      placeholder: e.g. 1.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: flutter
+    attributes:
+      label: Flutter doctor
+      placeholder: Output of `flutter doctor -v` (or at least the Flutter + Dart versions)
+      render: text

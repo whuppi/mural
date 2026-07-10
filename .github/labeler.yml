@@ -1,0 +1,16 @@
+# Auto-label PRs by file path. Used by actions/labeler (the shared triage
+# workflow). https://github.com/actions/labeler
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+          - .githooks/**
+          - Makefile
+          - tool/**
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/**
+          - '**/*.md'

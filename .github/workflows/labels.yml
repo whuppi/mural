@@ -1,0 +1,26 @@
+# Labels — sync the repo's labels to .github/labels.json (the single source of
+# truth) via the shared reusable workflow. Edit a label there, push to dev, and
+# GitHub is made to match. Never edit labels in the UI; the next run reverts it.
+name: Labels
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - .github/labels.json
+      - .github/workflows/labels.yml
+  workflow_dispatch:
+
+permissions: {}
+
+# One sync at a time; the newest manifest wins, so cancel an in-flight run.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  labels:
+    permissions:
+      contents: read  # checkout reads .github/labels.json
+      issues: write   # labels are managed through the Issues API
+    uses: whuppi/ci/.github/workflows/labels.yml@v2.0.5

@@ -1,0 +1,11 @@
+feat
+fix
+docs
+chore
+ci
+test
+refactor
+perf
+build
+deps
+release

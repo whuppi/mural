@@ -1,0 +1,182 @@
+# Full test — maintainer adds "ready-to-test" to trigger. Label auto-removed on
+# new pushes (stale results = wasted compute). Single matrix — core rows run
+# always, portability rows (marked [P]) run when the portability toggle is on.
+# Each row declares capabilities; the shared make-target provisions them.
+#
+# Rows: package tests (VM + real Chrome per OS), example journeys (host VM),
+# integration smokes (real plugins on real devices), and verify (release builds).
+name: Full Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches: [prod, dev]
+  workflow_dispatch:
+    inputs:
+      portability:
+        description: "Portability — test every valid runner per target"
+        type: boolean
+        default: true
+      filter:
+        description: "Filter by target (android, web...) or type (pkg, int, verify)"
+        type: choice
+        options:
+          - all
+          - android
+          - ios
+          - macos
+          - linux
+          - windows
+          - web
+          - pkg
+          - int
+          - verify
+        default: all
+      runner:
+        description: "Runner for infra jobs (gate)"
+        type: choice
+        options: [ubuntu-24.04, macos-14, windows-2025-vs2026]
+        default: ubuntu-24.04
+
+permissions: {}
+
+concurrency:
+  group: full-test-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  DEFAULT_RUNNER: ubuntu-24.04
+  DEFAULT_PORTABILITY: 'true'
+
+jobs:
+  inputs:
+    name: Resolve inputs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    outputs:
+      runner: ${{ steps.resolve.outputs.runner }}
+      portability: ${{ steps.resolve.outputs.portability }}
+      filter: ${{ steps.resolve.outputs.filter }}
+    steps:
+      - id: resolve
+        shell: bash
+        env:
+          RUNNER_IN: ${{ inputs.runner }}
+          RUNNER_DEF: ${{ env.DEFAULT_RUNNER }}
+          PORT_IN: ${{ inputs.portability }}
+          PORT_DEF: ${{ env.DEFAULT_PORTABILITY }}
+          FILTER_IN: ${{ inputs.filter }}
+        run: |
+          {
+            echo "runner=${RUNNER_IN:-$RUNNER_DEF}"
+            echo "portability=${PORT_IN:-$PORT_DEF}"
+            echo "filter=${FILTER_IN:-all}"
+          } >> "$GITHUB_OUTPUT"
+
+  test:
+    needs: inputs
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'ready-to-test')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ── Package tests ──
+          - { name: "pkg: Linux (ubuntu-x64)",     runner: ubuntu-24.04,        make: test-unit, timeout: 20 }
+          - { name: "pkg: macOS (macos-arm64)",    runner: macos-14,            make: test-unit, timeout: 20 }
+          - { name: "pkg: Windows (win-x64)",      runner: windows-2025-vs2026, make: test-unit, timeout: 30 }
+          - { name: "pkg: Web (ubuntu-x64)",       runner: ubuntu-24.04,        make: test-web, timeout: 30, chrome: true, headless-display: true }
+          - { name: "pkg: Web (macos-arm64) [P]",  runner: macos-14,            make: test-web, timeout: 30, chrome: true, portability: true }
+          - { name: "pkg: Web (win-x64) [P]",      runner: windows-2025-vs2026, make: test-web, timeout: 40, chrome: true, portability: true }
+
+          # ── Example journeys (host VM, in-memory) ──
+          - { name: "int: Journeys (ubuntu-x64)",      runner: ubuntu-24.04,        make: test-example-matrix, timeout: 20 }
+          - { name: "int: Journeys (macos-arm64) [P]", runner: macos-14,            make: test-example-matrix, timeout: 20, portability: true }
+          - { name: "int: Journeys (win-x64) [P]",     runner: windows-2025-vs2026, make: test-example-matrix, timeout: 30, portability: true }
+
+          # ── Integration smokes (real plugins, real devices) ──
+          # Emulator needs Intel virtualization — macOS ARM runners can't host it.
+          - { name: "int: Android (ubuntu-x64)",      runner: ubuntu-24.04,        make: test-example-android, timeout: 40, java: true, hw-accel: true, gradle-cache: true, emulator: true }
+          - { name: "int: Android (macos-intel) [P]", runner: macos-15-intel,      make: test-example-android, timeout: 60, java: true, hw-accel: true, gradle-cache: true, emulator: true, portability: true }
+          - { name: "int: Android (win-x64) [P]",     runner: windows-2025-vs2026, make: test-example-android, timeout: 60, java: true, hw-accel: true, gradle-cache: true, emulator: true, portability: true }
+          - { name: "int: iOS (macos-arm64)",    runner: macos-14,            make: test-example-ios,     timeout: 60, xcode-cache: true, xcode-cache-target: ios, pods-cache: true, simulator: true }
+          - { name: "int: Linux (ubuntu-x64)",   runner: ubuntu-24.04,        make: test-example-linux,   timeout: 30, headless-display: true }
+          - { name: "int: macOS (macos-arm64)",  runner: macos-14,            make: test-example-macos,   timeout: 30, xcode-cache: true, xcode-cache-target: macos }
+          - { name: "int: Windows (win-x64)",    runner: windows-2025-vs2026, make: test-example-windows, timeout: 40 }
+          - { name: "int: Web (ubuntu-x64)",       runner: ubuntu-24.04,        make: test-example-web, timeout: 40, chrome: true, headless-display: true }
+          - { name: "int: Web (macos-arm64) [P]",  runner: macos-14,            make: test-example-web, timeout: 40, chrome: true, portability: true }
+          - { name: "int: Web (win-x64) [P]",      runner: windows-2025-vs2026, make: test-example-web, timeout: 40, chrome: true, portability: true }
+
+          # ── Verify (release builds) ──
+          - { name: "verify: Android (ubuntu-x64)",      runner: ubuntu-24.04,        make: verify-android, timeout: 40, java: true, gradle-cache: true }
+          - { name: "verify: Android (macos-arm64) [P]", runner: macos-14,            make: verify-android, timeout: 40, java: true, gradle-cache: true, portability: true }
+          - { name: "verify: Android (win-x64) [P]",     runner: windows-2025-vs2026, make: verify-android, timeout: 60, java: true, gradle-cache: true, portability: true }
+          - { name: "verify: iOS (macos-arm64)",    runner: macos-14,            make: verify-ios,     timeout: 40, xcode-cache: true, xcode-cache-target: ios, pods-cache: true }
+          - { name: "verify: Linux (ubuntu-x64)",   runner: ubuntu-24.04,        make: verify-linux,   timeout: 30 }
+          - { name: "verify: macOS (macos-arm64)",  runner: macos-14,            make: verify-macos,   timeout: 40, xcode-cache: true, xcode-cache-target: macos }
+          - { name: "verify: Web (ubuntu-x64)",      runner: ubuntu-24.04,        make: verify-web, timeout: 30 }
+          - { name: "verify: Web (macos-arm64) [P]", runner: macos-14,            make: verify-web, timeout: 40, portability: true }
+          - { name: "verify: Web (win-x64) [P]",     runner: windows-2025-vs2026, make: verify-web, timeout: 40, portability: true }
+          - { name: "verify: Windows (win-x64)",    runner: windows-2025-vs2026, make: verify-windows, timeout: 40 }
+
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: ${{ matrix.timeout }}
+    permissions:
+      contents: read  # checkout + caches; no API writes
+    steps:
+      - name: Check filter
+        id: filter
+        uses: whuppi/ci/actions/matrix-filter@v2.0.5
+        with:
+          name: ${{ matrix.name }}
+          filter: ${{ needs.inputs.outputs.filter }}
+          portability: ${{ needs.inputs.outputs.portability }}
+          row-portability: ${{ matrix.portability || 'false' }}
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        if: steps.filter.outputs.match == 'true'
+        with:
+          persist-credentials: false
+      - uses: whuppi/ci/actions/make-target@v2.0.5
+        if: steps.filter.outputs.match == 'true'
+        with:
+          make-target: ${{ matrix.make }}
+          java: ${{ matrix.java || 'false' }}
+          chrome: ${{ matrix.chrome || 'false' }}
+          headless-display: ${{ matrix.headless-display || 'false' }}
+          hw-accel: ${{ matrix.hw-accel || 'false' }}
+          gradle-cache: ${{ matrix.gradle-cache || 'false' }}
+          xcode-cache: ${{ matrix.xcode-cache || 'false' }}
+          xcode-cache-target: ${{ matrix.xcode-cache-target || '' }}
+          pods-cache: ${{ matrix.pods-cache || 'false' }}
+          emulator: ${{ matrix.emulator || 'false' }}
+          simulator: ${{ matrix.simulator || 'false' }}
+      - name: Upload test results
+        if: always() && steps.filter.outputs.match == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ matrix.make }}-${{ matrix.runner }}
+          path: test-results/
+          if-no-files-found: ignore
+
+  gate:
+    name: Full Test Gate
+    if: always()
+    needs: [inputs, test]
+    runs-on: ${{ needs.inputs.outputs.runner }}
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Evaluate
+        shell: bash
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+        run: |
+          RESULT="$TEST_RESULT"
+          if [[ "$RESULT" != "success" && "$RESULT" != "skipped" ]]; then
+            echo "FAILED: test returned '$RESULT'"
+            exit 1
+          fi
+          echo "All jobs passed"

@@ -1,0 +1,38 @@
+name: mural_example
+description: >-
+  Demonstrates mural — every capture door, with the results on screen:
+  offscreen capture, the frozen-moment boundary capture, and a streamed
+  big capture under a tight memory budget.
+publish_to: none
+version: 0.0.0
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The package under demonstration. Pulled from the parent via path;
+  # CI replaces this with the published version at release verification.
+  mural:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Decodes captures back to pixels in the integration smoke — an
+  # independent check that the PNGs mural produced are real PNGs.
+  image: ^4.3.0
+
+  # The robot harness + device matrix shared by test/journeys and
+  # integration_test through one package: import.
+  mural_example_test_support:
+    path: test_support/
+
+flutter:
+  uses-material-design: true

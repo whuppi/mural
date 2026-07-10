@@ -1,0 +1,52 @@
+# slopfairy config for whuppi/mural — any-size Flutter widget→image capture
+# (offscreen render host, tiled rasterization under a learned GPU limit,
+# in-package streaming PNG). Pure Dart, zero runtime dependencies, no native
+# code. Overrides defaults; missing keys use built-in behavior.
+
+reviews:
+  auto_review: true
+  focus_areas:
+    - correctness
+    - target-safety
+  ignore_paths: []
+  path_instructions:
+    - path: "lib/src/**"
+      instructions: >
+        The seam-fidelity math is load-bearing: tile origins must stay
+        multiples of 8 (engine dither matrix) and interior seams keep their
+        bleed margin — flag any "simplification" of the planner, blit
+        offsets, or bleed cropping. No dart:io anywhere; dart:js_interop
+        only in the two web seam files; dart:isolate only in the native
+        PNG worker. Expected failures complete the MuralTask with a typed
+        MuralError — never a throw to the caller, never a timer/delay
+        option. Watch buffer reuse for cross-capture pixel leaks.
+    - path: ".github/**"
+      instructions: >
+        Check workflow security: pull_request_target must not check out or run
+        PR-head code; untrusted github.event.* values (PR title, branch refs,
+        comment bodies) belong in env:, never interpolated into a run: block;
+        flag rolling action refs (@main / @vN) that should be a pinned SHA or
+        the exact whuppi/ci tag, and any secret exposed to fork code.
+
+triage:
+  auto_label: true
+  auto_assign: false
+
+personality:
+  tone: professional
+  extra_instructions: |
+    This is a PUBLIC Dart/Flutter package on pub.dev. External contributors and
+    users open issues and PRs — be welcoming, patient, and helpful.
+
+    Key facts:
+    - Cross-platform: Android, iOS, macOS, Windows, Linux, Web.
+    - Pure Dart/Flutter, zero runtime dependencies, no native code; the only
+      platform splits are two conditional-export seams (encode worker, web
+      raster policy).
+    - Tests are platform-blind batteries run by two runners (VM and wasm
+      Chrome); the web lane MUST use --wasm (the DDC lane hangs upstream).
+    - CI and releases run on the shared whuppi/ci tooling, pinned to an exact
+      tag; versions and changelogs are managed by that release tooling, not
+      release-please.
+    - Conventional commits enforced. Default branch dev, prod branch for stable
+      releases. Linear chain: feature → dev → prod.

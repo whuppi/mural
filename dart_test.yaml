@@ -1,0 +1,24 @@
+# Default test target is the VM. Web tests run explicitly against the
+# web runner — mural is a Flutter package, so the runner is the flutter
+# tool (never plain `dart test`):
+#
+#   fvm flutter test                                # VM: all batteries + native suites
+#   fvm flutter test --platform chrome --wasm test/runners/web_runner_test.dart
+#                                                   # every battery in a real web engine
+#
+# The web lane MUST pass --wasm: the DDC lane has a module-emission bug
+# that hangs suite loading forever (upstream report tracked in repo
+# tasks).
+#
+# Or use the Makefile:
+#   make test-unit  # VM
+#   make test-web   # Chrome
+#   make check      # the full gate
+#
+# On CI the Makefile wraps CHROME_EXECUTABLE with --no-sandbox
+# --disable-gpu (Chrome for Testing ships no SUID sandbox binary).
+
+# 2x headroom for the web lane: CI Chrome runs with --disable-gpu, so the
+# heavy pixel suites (the differential ground-truth and band-seam tests)
+# rasterize on software rendering. Local runs are far under the default.
+timeout: 2x
