@@ -56,7 +56,7 @@ Capture any Flutter widget as an image, at any size: a widget that was never on 
 
 ```yaml
 dependencies:
-  mural:
+  mural: ^1.0.0
 ```
 
 Nothing else to do, on any platform. It's pure Dart on top of Flutter: no native code to build, nothing to configure. Android, iOS, macOS, Windows, Linux, and web from one codebase.
