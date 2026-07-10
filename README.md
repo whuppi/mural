@@ -84,6 +84,8 @@ final shot = await mural.capture(
 await File('receipt.png').writeAsBytes(shot.bytes);
 ```
 
+(`File` is the native-platforms way to keep the bytes. To save, share, or open the image on every platform including web, hand `shot.bytes` to [`device_io`](https://pub.dev/packages/device_io) — same publisher, one API for all of it.)
+
 That's the shape of every call: give mural a widget (or a key), await the image. Three doors, one per situation:
 
 ```dart
@@ -358,6 +360,7 @@ What the shipped package doesn't do, and what to use instead. Full per-capabilit
 
 - **Platform views** (Google Maps, Camera, WebView) render blank in ANY Flutter capture: theirs are OS-composited surfaces with no drawing instructions for Flutter to rasterize ([flutter/flutter#102866](https://github.com/flutter/flutter/issues/102866)). An OS-level compositing satellite is on the [roadmap](docs/CAPABILITY_ROADMAP.md).
 - **WebP / JPEG encoding.** PNG comes built in; for anything else, take `rawRgba` and hand the pixels to the encoder of your choice; nothing is lost on the way.
+- **Saving, sharing, or opening the image.** Mural's job ends at the bytes. Putting them on disk, in the OS share sheet, or in the default viewer, on every platform including web, is [`device_io`](https://pub.dev/packages/device_io)'s job: `saver.save(bytes: shot.bytes, fileName: 'shot.png')`, `sharer.shareFile(...)`, `opener.openBytes(...)`.
 - **Video / animation export.** One capture is one moment. For frames, fire `captureBoundary` on each tick (every call captures its own instant) and feed the `rawRgba` frames to your video encoder.
 
 ---
