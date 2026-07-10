@@ -71,3 +71,4 @@ jobs:
         run: |
           echo "SSH session open. Touch /tmp/stop to end."
           while [ ! -f /tmp/stop ]; do sleep 10; done
+
