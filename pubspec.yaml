@@ -1,5 +1,5 @@
 name: mural
-version: 0.0.0
+version: 1.0.0-dev.0
 description: >-
   Capture any Flutter widget as an image, at any size. Screenshot huge
   lists, full pages, and even unseen widgets — past the GPU texture
