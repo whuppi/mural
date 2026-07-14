@@ -46,7 +46,7 @@ maintenance recipes see [`UPDATING.md`](UPDATING.md).
 |---|---|---|
 | Android / iOS / macOS / Windows / Linux | DONE | One codebase; pana attributes all six platforms (`make platforms`) |
 | Web (wasm lane) | DONE | Full battery suite green in wasm Chrome |
-| Web (DDC lane) | BLOCKED | Upstream flutter-tools module-emission bug hangs suite loading; report tracked in the repo tasks. Runtime consumers are unaffected — this is a test-lane issue |
+| Web (DDC lane) | WONT_DO | The `--platform chrome` (non-wasm) lane hangs at suite load on Flutter 3.44.4 stable; verified fixed on master (3.46 pre) by the web-test loader rewrite (require.js → DDC library-bundle `$dartLoader`). Stable-only, self-resolving next stable, and the `--wasm` lane is unaffected, so mural runs web tests there. No fix needed |
 
 ## Infrastructure
 
