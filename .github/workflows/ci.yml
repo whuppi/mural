@@ -79,7 +79,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         with:
           make-target: format
 
@@ -95,7 +95,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         with:
           make-target: analyze
 
@@ -113,7 +113,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         with:
           make-target: analyze-floor
 
@@ -132,7 +132,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         with:
           make-target: platforms
 
@@ -148,7 +148,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         with:
           make-target: test-guards
 
@@ -164,7 +164,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         with:
           make-target: test-unit
 
@@ -180,7 +180,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         with:
           make-target: test-web
           chrome: 'true'

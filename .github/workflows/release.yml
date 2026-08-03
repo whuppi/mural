@@ -35,7 +35,7 @@ jobs:
   release:
     permissions:
       contents: write  # create the release/tag, edit notes, ephemeral publish commit
-    uses: whuppi/ci/.github/workflows/release.yml@v2.0.5
+    uses: whuppi/ci/.github/workflows/release.yml@v2.4.0
     with:
       branch: ${{ inputs.branch || github.ref_name }}
       runner: ${{ inputs.runner || 'ubuntu-24.04' }}

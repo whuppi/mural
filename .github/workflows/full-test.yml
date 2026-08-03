@@ -129,7 +129,7 @@ jobs:
     steps:
       - name: Check filter
         id: filter
-        uses: whuppi/ci/actions/matrix-filter@v2.0.5
+        uses: whuppi/ci/actions/matrix-filter@v2.4.0
         with:
           name: ${{ matrix.name }}
           filter: ${{ needs.inputs.outputs.filter }}
@@ -139,7 +139,7 @@ jobs:
         if: steps.filter.outputs.match == 'true'
         with:
           persist-credentials: false
-      - uses: whuppi/ci/actions/make-target@v2.0.5
+      - uses: whuppi/ci/actions/make-target@v2.4.0
         if: steps.filter.outputs.match == 'true'
         with:
           make-target: ${{ matrix.make }}
