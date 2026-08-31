@@ -27,7 +27,7 @@ dev_dependencies:
 
   # Decodes captures back to pixels in the integration smoke — an
   # independent check that the PNGs mural produced are real PNGs.
-  image: ^4.3.0
+  image: ^4.9.2
 
   # The robot harness + device matrix shared by test/journeys and
   # integration_test through one package: import.
